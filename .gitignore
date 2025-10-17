@@ -1,0 +1,107 @@
+# ======================================
+#  .NET / Visual Studio 2022 ignore file
+# ======================================
+
+## Build results
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]ogs/
+*.log
+
+## User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio cache
+.vs/
+.vscode/
+
+## Test results
+TestResult*/
+*.VisualState.xml
+*.coverage
+*.coveragexml
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+.nuget/
+
+## Compiled DLLs / executables
+*.dll
+*.exe
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.msm
+*.msp
+*.pdb
+
+## Publish output
+wwwroot/dist/
+publish/
+artifacts/
+*.pubxml
+*.pubxml.user
+
+## Configuration / secrets
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+.env
+.env.*
+
+## Docker
+docker-compose.override.yml
+*.pid
+*.pid.lock
+
+## SQL Server / Database
+*.dacpac
+*.bacpac
+*.mdf
+*.ldf
+*.ndf
+*.dbmdl
+*.sqlproj.user
+
+## JetBrains Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+## OS-specific
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Linux
+*~
+.nfs*
+
+## Miscellaneous
+*.swp
+*.swo
+*.tmp
+*.bak
+*.old
+*.orig
+*.cache
+node_modules/
+dist/
+coverage/

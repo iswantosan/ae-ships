@@ -14,6 +14,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString));
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IShipRepository>(provider => new ShipRepository(connectionString));
+builder.Services.AddScoped<IShipService, ShipService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

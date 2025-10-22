@@ -1,0 +1,323 @@
+# Ship Management System - Database Design
+
+## Database Schema Visualization
+
+```
+┌─────────────────────┐
+│      Ships          │
+├─────────────────────┤
+│ Code (PK)           │
+│ Name                │
+│ FiscalYear          │
+│ Status              │
+└─────────────────────┘
+         │
+         │ 1:N
+         ▼
+┌─────────────────────────────┐         ┌─────────────────────┐
+│  CrewServiceHistory         │ N:1     │    CrewMembers      │
+├─────────────────────────────┤◄────────┤─────────────────────┤
+│ ServiceHistoryId (PK)       │         │ CrewMemberId (PK)   │
+│ CrewMemberId (FK)           │         │ FirstName           │
+│ ShipCode (FK)               │         │ LastName            │
+│ RankId (FK)                 │         │ BirthDate           │
+│ SignOnDate                  │         │ Nationality         │
+│ SignOffDate                 │         └─────────────────────┘
+│ EndOfContractDate           │
+└─────────────────────────────┘
+         │ N:1
+         ▼
+┌─────────────────────┐
+│      Ranks          │
+├─────────────────────┤
+│ RankId (PK)         │
+│ RankName            │
+│ RankOrder           │
+└─────────────────────┘
+
+
+┌─────────────────────┐        ┌──────────────────────────┐        ┌─────────────────────┐
+│      Ships          │ N      │  UserShipAssignments     │      N │       Users         │
+├─────────────────────┤◄───────┼──────────────────────────┼────────►├─────────────────────┤
+│ Code (PK)           │        │ UserId (PK,FK)           │        │ UserId (PK)         │
+└─────────────────────┘        │ ShipCode (PK,FK)         │        │ Name                │
+                               │ AssignedDate             │        │ Role                │
+                               └──────────────────────────┘        └─────────────────────┘
+
+
+┌─────────────────────┐
+│ ChartOfAccounts     │  Self-referencing hierarchy
+├─────────────────────┤  (Parent-Child relationship)
+│ AccountNumber (PK)  │        ┌─────────────┐
+│ Description         │◄───────┤ Parent      │
+│ ParentAccountNumber │        │ Account     │
+│ AccountType         │        └─────────────┘
+└─────────────────────┘
+         │
+         │ 1:N
+         ├──────────────────────┬────────────────────────┐
+         ▼                      ▼                        │
+┌─────────────────────┐   ┌─────────────────────┐     │
+│    BudgetData       │   │ AccountTransactions │     │
+├─────────────────────┤   ├─────────────────────┤     │
+│ BudgetId (PK)       │   │ TransactionId (PK)  │     │
+│ ShipCode (FK)       │   │ ShipCode (FK)       │     │ 1:N from Ships
+│ AccountNumber (FK)  │   │ AccountNumber (FK)  │     │
+│ AccountPeriod       │   │ AccountPeriod       │     │
+│ BudgetValue         │   │ ActualValue         │◄────┘
+└─────────────────────┘   │ TransactionDate     │
+                          └─────────────────────┘
+```
+
+## Fiscal Year Calculation Logic
+
+### Fiscal Year Format
+
+Format: `MMDD` where:
+
+-   First 2 digits (MM) = Start month
+-   Last 2 digits (DD) = End month
+
+### Examples
+
+-   `0112`: January to December (calendar year)
+-   `0403`: April to March (starts in April, ends in March next year)
+-   `0703`: July to March (starts in July, ends in March next year)
+
+### YTD Period Calculation
+
+```sql
+-- Determine fiscal year start for a given period
+IF @PeriodMonth >= @FiscalStartMonth
+    -- Same calendar year
+    @FiscalYearStartDate = DATEFROMPARTS(@PeriodYear, @FiscalStartMonth, 1)
+ELSE
+    -- Previous calendar year
+    @FiscalYearStartDate = DATEFROMPARTS(@PeriodYear - 1, @FiscalStartMonth, 1)
+
+-- YTD range: @FiscalYearStartDate to @AccountPeriod
+```
+
+### Example Scenarios
+
+**Ship with FiscalYear = "0112" (Jan-Dec)**
+
+-   Period: July 2025
+-   YTD Range: Jan 2025 to Jul 2025
+
+**Ship with FiscalYear = "0403" (Apr-Mar)**
+
+-   Period: July 2025
+-   YTD Range: Apr 2025 to Jul 2025
+-   Period: February 2025
+-   YTD Range: Apr 2024 to Feb 2025
+
+## Crew Status Logic
+
+### Status Determination
+
+Based on current date relative to service history dates:
+
+```
+Current Date = Today
+
+IF SignOffDate IS NOT NULL:
+    Status = "Signed Off"
+ELSE IF SignOnDate > Current Date:
+    Status = "Planned"
+ELSE IF SignOffDate IS NULL AND Current Date <= EndOfContractDate:
+    Status = "Onboard"
+ELSE IF SignOffDate IS NULL AND (Current Date - EndOfContractDate) > 30 days:
+    Status = "Relief Due"
+```
+
+### Status Flow Diagram
+
+```
+                    ┌─────────────┐
+                    │   Planned   │ (Future assignment)
+                    └──────┬──────┘
+                           │ SignOnDate arrives
+                           ▼
+                    ┌─────────────┐
+                    │   Onboard   │ (Active service)
+                    └──────┬──────┘
+                           │
+          ┌────────────────┴────────────────┐
+          │                                 │
+          │ EndOfContractDate               │ SignOffDate set
+          │ passed > 30 days                │
+          ▼                                 ▼
+   ┌──────────────┐                 ┌─────────────┐
+   │ Relief Due   │                 │ Signed Off  │ (Completed)
+   └──────────────┘                 └─────────────┘
+          │
+          │ SignOffDate set
+          ▼
+   ┌─────────────┐
+   │ Signed Off  │
+   └─────────────┘
+```
+
+## Chart of Accounts Hierarchy
+
+### Structure
+
+Multi-level hierarchy supporting unlimited depth:
+
+```
+Level 0 (Root Parent)
+  └─ Level 1 (Parent or Child)
+      └─ Level 2 (Child)
+          └─ Level 3 (Child)
+```
+
+### Account Types
+
+-   **Parent**: Summary/aggregation accounts (no direct transactions)
+-   **Child**: Detail accounts (where transactions are recorded)
+
+### Aggregation Rules
+
+1. Transactions and budgets recorded only at Child account level
+2. Parent account values = SUM of all descendant Child accounts
+3. Recursive aggregation for multi-level hierarchies
+
+### Example from Sample Data
+
+```
+7000000 OPERATING EXPENSES (Parent)
+    ActualYTD = Sum of all children below
+
+├── 7100000 AWARD AND GRANT TO INDIVIDUALS (Child of 7000000)
+│   ├── 7120000 AWARDS (Child of 7100000)
+│   │   ActualYTD = Direct transactions
+│   └── 7135000 SCHOLARSHIPS (Child of 7100000)
+│       ActualYTD = Direct transactions
+│
+└── 7200000 PERSONNEL COSTS (Child of 7000000)
+    ├── 7210000 SALARIES AND WAGES (Child of 7200000)
+    │   ActualYTD = Direct transactions
+    └── 7220000 OVERTIME PAY (Child of 7200000)
+        ActualYTD = Direct transactions
+```
+
+## Financial Reporting Rules
+
+### Zero vs NULL
+
+-   **Zero (0)**: Explicit value, indicates zero cost/budget
+-   **NULL**: Value unknown or not applicable
+-   Report displays NULL when zero to reduce clutter
+
+### Variance Calculation
+
+```
+Variance = Actual - Budget
+
+Positive variance = Over budget (spent more than budgeted)
+Negative variance = Under budget (spent less than budgeted)
+```
+
+### Filtering Rules
+
+Only include accounts where:
+
+```sql
+ActualPeriod <> 0 OR BudgetPeriod <> 0 OR ActualYTD <> 0 OR BudgetYTD <> 0
+```
+
+This excludes accounts with no activity in the reporting period.
+
+## Stored Procedures
+
+### sp_GetCrewList
+
+Returns crew members for a ship with status Onboard or Relief Due.
+
+**Parameters**:
+
+-   `@ShipCode`: Ship to query
+-   `@PageNumber`: Page number (default 1)
+-   `@PageSize`: Records per page (default 10)
+-   `@SortColumn`: Column to sort by (default 'RankOrder')
+-   `@SortDirection`: ASC or DESC (default 'ASC')
+-   `@SearchTerm`: Optional search filter
+
+**Features**:
+
+-   Pagination support
+-   Dynamic sorting on any column
+-   Search across all columns (including partial date matches)
+-   Calculates age dynamically
+-   Determines crew status based on dates
+-   Excludes signed-off crew
+
+### sp_GetFinancialReport
+
+Returns financial report with period and YTD values.
+
+**Parameters**:
+
+-   `@ShipCode`: Ship to query
+-   `@AccountPeriod`: Reporting period (date)
+
+**Features**:
+
+-   Hierarchical account display
+-   Fiscal year-aware YTD calculations
+-   Parent account aggregation
+-   Variance calculations (Actual - Budget)
+-   Filters zero-value records
+
+### sp_GetShips
+
+Returns list of ships with optional filtering.
+
+**Parameters**:
+
+-   `@Status`: Filter by status (optional)
+-   `@UserId`: Filter by user assignment (optional)
+
+### sp_GetShipsByUser
+
+Returns ships assigned to a specific user.
+
+**Parameters**:
+
+-   `@UserId`: User identifier
+
+### sp_GetCrewMemberHistory
+
+Returns complete service history for a crew member.
+
+**Parameters**:
+
+-   `@CrewMemberId`: Crew member identifier
+
+## Sample Data Summary
+
+### Ships: 6 ships
+
+-   3 Active (SHIP01, SHIP02, SHIP03, SHIP06)
+-   2 Inactive (SHIP04, SHIP05)
+-   Fiscal years: 0112, 0403, 0703
+
+### Crew: 125+ crew members
+
+-   Multiple contracts per ship
+-   Various statuses (Onboard, Relief Due, Signed Off, Planned)
+-   18 different rank types
+
+### Financial Data
+
+-   3 ships with full financial data (SHIP01, SHIP02, SHIP03)
+-   5 parent account groups
+-   30+ child accounts across 2-3 levels
+-   Budget and transaction data for 2024 and 2025
+-   Covers both fiscal year types (0112 and 0403)
+
+### Users: 8 users
+
+-   Various roles (Fleet Manager, Operations Manager, etc.)
+-   Multiple ship assignments per user

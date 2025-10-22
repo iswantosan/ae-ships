@@ -1,0 +1,37 @@
+INSERT INTO Users (Name, Role) VALUES
+('John Smith', 'Fleet Manager'),
+('Maria Garcia', 'Operations Manager'),
+('David Chen', 'Technical Superintendent'),
+('Sarah Johnson', 'Marine Superintendent'),
+('Ahmed Hassan', 'Crewing Manager'),
+('Lisa Anderson', 'Financial Controller'),
+('Robert Wilson', 'Port Captain'),
+('Elena Rodriguez', 'Fleet Coordinator');
+
+INSERT INTO UserShipAssignments (UserId, ShipCode, AssignedDate) VALUES
+(1, 'SHIP01', '2024-01-01'),
+(1, 'SHIP02', '2024-01-01'),
+(1, 'SHIP03', '2024-01-01'),
+(1, 'SHIP04', '2024-01-01'),
+(1, 'SHIP05', '2024-01-01'),
+(1, 'SHIP06', '2024-01-01'),
+(2, 'SHIP01', '2024-02-15'),
+(2, 'SHIP02', '2024-02-15'),
+(2, 'SHIP03', '2024-02-15'),
+(3, 'SHIP01', '2024-03-01'),
+(3, 'SHIP03', '2024-03-01'),
+(3, 'SHIP06', '2024-03-01'),
+(4, 'SHIP02', '2024-01-15'),
+(4, 'SHIP04', '2024-01-15'),
+(5, 'SHIP01', '2024-01-20'),
+(5, 'SHIP02', '2024-01-20'),
+(5, 'SHIP03', '2024-01-20'),
+(5, 'SHIP06', '2024-01-20'),
+(6, 'SHIP01', '2024-02-01'),
+(6, 'SHIP02', '2024-02-01'),
+(6, 'SHIP03', '2024-02-01'),
+(7, 'SHIP02', '2024-03-15'),
+(7, 'SHIP04', '2024-03-15'),
+(8, 'SHIP01', '2024-04-01'),
+(8, 'SHIP06', '2024-04-01');
+

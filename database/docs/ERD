@@ -1,0 +1,298 @@
+# Entity Relationship Diagram
+
+## Overview
+
+Ship Management System database schema supporting ship operations, crew management, user assignments, and financial reporting.
+
+## Entities
+
+### 1. Ships
+
+**Primary Entity**: Core ship information
+
+| Column     | Type          | Constraints     | Description                                              |
+| ---------- | ------------- | --------------- | -------------------------------------------------------- |
+| Code       | VARCHAR(20)   | PK              | Unique ship identifier                                   |
+| Name       | NVARCHAR(200) | NOT NULL        | Ship name                                                |
+| FiscalYear | CHAR(4)       | NOT NULL, CHECK | Fiscal year code (MMDD format, e.g., "0112" for Jan-Dec) |
+| Status     | VARCHAR(20)   | NOT NULL, CHECK | Ship status (Active/Inactive)                            |
+
+**Business Rules**:
+
+-   Status must be 'Active' or 'Inactive'
+-   FiscalYear format: First 2 digits = start month, Last 2 digits = end month
+-   Only active ships appear in operational queries
+
+---
+
+### 2. CrewMembers
+
+**Primary Entity**: Crew member master data
+
+| Column       | Type          | Constraints | Description            |
+| ------------ | ------------- | ----------- | ---------------------- |
+| CrewMemberId | VARCHAR(20)   | PK          | Unique crew identifier |
+| FirstName    | NVARCHAR(100) | NOT NULL    | First name             |
+| LastName     | NVARCHAR(100) | NOT NULL    | Last name              |
+| BirthDate    | DATE          | NOT NULL    | Date of birth          |
+| Nationality  | NVARCHAR(100) | NOT NULL    | Nationality            |
+
+---
+
+### 3. Ranks
+
+**Reference Entity**: Maritime rank classifications
+
+| Column    | Type          | Constraints      | Description                              |
+| --------- | ------------- | ---------------- | ---------------------------------------- |
+| RankId    | INT           | PK, IDENTITY     | Rank identifier                          |
+| RankName  | NVARCHAR(100) | NOT NULL, UNIQUE | Rank name (e.g., Master, Chief Engineer) |
+| RankOrder | INT           | NOT NULL, UNIQUE | Hierarchy order for sorting              |
+
+**Sample Ranks** (ordered by hierarchy):
+
+1. Master
+2. Chief Officer
+3. Chief Engineer
+4. Second Officer
+5. Second Engineer
+   ...and more
+
+---
+
+### 4. CrewServiceHistory
+
+**Transaction Entity**: Crew assignments to ships
+
+| Column            | Type        | Constraints  | Description                                 |
+| ----------------- | ----------- | ------------ | ------------------------------------------- |
+| ServiceHistoryId  | INT         | PK, IDENTITY | History record identifier                   |
+| CrewMemberId      | VARCHAR(20) | FK, NOT NULL | References CrewMembers                      |
+| ShipCode          | VARCHAR(20) | FK, NOT NULL | References Ships                            |
+| RankId            | INT         | FK, NOT NULL | References Ranks                            |
+| SignOnDate        | DATE        | NOT NULL     | Date crew joined ship                       |
+| SignOffDate       | DATE        | NULL         | Date crew left ship (NULL if still onboard) |
+| EndOfContractDate | DATE        | NOT NULL     | Scheduled contract end date                 |
+
+**Constraints**:
+
+-   SignOnDate <= EndOfContractDate
+-   SignOffDate >= SignOnDate (if not NULL)
+
+**Status Calculation Logic**:
+
+-   **Onboard**: SignOnDate <= today, SignOffDate IS NULL, EndOfContractDate >= today
+-   **Planned**: SignOnDate > today, SignOffDate IS NULL
+-   **Relief Due**: SignOffDate IS NULL, today > EndOfContractDate + 30 days
+-   **Signed Off**: SignOffDate IS NOT NULL
+
+---
+
+### 5. Users
+
+**Primary Entity**: System users
+
+| Column | Type          | Constraints  | Description                     |
+| ------ | ------------- | ------------ | ------------------------------- |
+| UserId | INT           | PK, IDENTITY | User identifier                 |
+| Name   | NVARCHAR(200) | NOT NULL     | User full name                  |
+| Role   | NVARCHAR(100) | NOT NULL     | User role (e.g., Fleet Manager) |
+
+---
+
+### 6. UserShipAssignments
+
+**Junction Entity**: Many-to-many relationship between Users and Ships
+
+| Column       | Type        | Constraints                 | Description      |
+| ------------ | ----------- | --------------------------- | ---------------- |
+| UserId       | INT         | PK, FK                      | References Users |
+| ShipCode     | VARCHAR(20) | PK, FK                      | References Ships |
+| AssignedDate | DATE        | NOT NULL, DEFAULT GETDATE() | Assignment date  |
+
+**Composite Primary Key**: (UserId, ShipCode)
+
+---
+
+### 7. ChartOfAccounts
+
+**Hierarchical Entity**: Financial account structure
+
+| Column              | Type          | Constraints     | Description                     |
+| ------------------- | ------------- | --------------- | ------------------------------- |
+| AccountNumber       | VARCHAR(20)   | PK              | Account number                  |
+| Description         | NVARCHAR(200) | NOT NULL        | Account description             |
+| ParentAccountNumber | VARCHAR(20)   | FK, NULL        | Self-referencing parent account |
+| AccountType         | VARCHAR(20)   | NOT NULL, CHECK | Type: 'Parent' or 'Child'       |
+
+**Hierarchy Rules**:
+
+-   Parent accounts: Summary accounts, calculated from children
+-   Child accounts: Detail accounts where transactions are recorded
+-   Multiple levels supported through recursive ParentAccountNumber
+
+**Example Structure**:
+
+```
+7000000 OPERATING EXPENSES (Parent, Level 0)
+  ├─ 7100000 AWARD AND GRANT TO INDIVIDUALS (Child of 7000000, Level 1)
+  │    ├─ 7120000 AWARDS (Child of 7100000, Level 2)
+  │    └─ 7135000 SCHOLARSHIPS (Child of 7100000, Level 2)
+  └─ 7200000 PERSONNEL COSTS (Child of 7000000, Level 1)
+       ├─ 7210000 SALARIES AND WAGES (Child of 7200000, Level 2)
+       └─ 7220000 OVERTIME PAY (Child of 7200000, Level 2)
+```
+
+---
+
+### 8. BudgetData
+
+**Transaction Entity**: Budget allocations per ship/account/period
+
+| Column        | Type          | Constraints          | Description                                      |
+| ------------- | ------------- | -------------------- | ------------------------------------------------ |
+| BudgetId      | INT           | PK, IDENTITY         | Budget record identifier                         |
+| ShipCode      | VARCHAR(20)   | FK, NOT NULL         | References Ships                                 |
+| AccountNumber | VARCHAR(20)   | FK, NOT NULL         | References ChartOfAccounts (Child accounts only) |
+| AccountPeriod | DATE          | NOT NULL             | Budget period (typically first day of month)     |
+| BudgetValue   | DECIMAL(18,2) | NOT NULL, CHECK >= 0 | Budget amount                                    |
+
+**Business Rules**:
+
+-   Budgets recorded only for Child accounts
+-   BudgetValue must be non-negative
+-   Multiple budget entries per period allowed (will be summed)
+-   Zero values are significant (different from NULL)
+
+---
+
+### 9. AccountTransactions
+
+**Transaction Entity**: Actual financial transactions
+
+| Column          | Type          | Constraints                 | Description                                      |
+| --------------- | ------------- | --------------------------- | ------------------------------------------------ |
+| TransactionId   | INT           | PK, IDENTITY                | Transaction identifier                           |
+| ShipCode        | VARCHAR(20)   | FK, NOT NULL                | References Ships                                 |
+| AccountNumber   | VARCHAR(20)   | FK, NOT NULL                | References ChartOfAccounts (Child accounts only) |
+| AccountPeriod   | DATE          | NOT NULL                    | Accounting period                                |
+| ActualValue     | DECIMAL(18,2) | NOT NULL, CHECK >= 0        | Transaction amount                               |
+| TransactionDate | DATE          | NOT NULL, DEFAULT GETDATE() | Transaction date                                 |
+
+**Business Rules**:
+
+-   Transactions recorded only for Child accounts
+-   ActualValue must be non-negative
+-   Multiple transactions per period are summed for reporting
+-   Zero values are significant (different from NULL)
+
+---
+
+## Relationships
+
+### One-to-Many Relationships
+
+1. **Ships → CrewServiceHistory** (1:N)
+
+    - One ship has many crew service records
+    - FK: CrewServiceHistory.ShipCode → Ships.Code
+
+2. **CrewMembers → CrewServiceHistory** (1:N)
+
+    - One crew member has many service history records
+    - FK: CrewServiceHistory.CrewMemberId → CrewMembers.CrewMemberId
+
+3. **Ranks → CrewServiceHistory** (1:N)
+
+    - One rank assigned to many service records
+    - FK: CrewServiceHistory.RankId → Ranks.RankId
+
+4. **Ships → BudgetData** (1:N)
+
+    - One ship has many budget records
+    - FK: BudgetData.ShipCode → Ships.Code
+
+5. **Ships → AccountTransactions** (1:N)
+
+    - One ship has many transactions
+    - FK: AccountTransactions.ShipCode → Ships.Code
+
+6. **ChartOfAccounts → BudgetData** (1:N)
+
+    - One account has many budget records
+    - FK: BudgetData.AccountNumber → ChartOfAccounts.AccountNumber
+
+7. **ChartOfAccounts → AccountTransactions** (1:N)
+
+    - One account has many transactions
+    - FK: AccountTransactions.AccountNumber → ChartOfAccounts.AccountNumber
+
+8. **ChartOfAccounts → ChartOfAccounts** (1:N, Self-Referencing)
+    - Parent account has many child accounts
+    - FK: ChartOfAccounts.ParentAccountNumber → ChartOfAccounts.AccountNumber
+
+### Many-to-Many Relationships
+
+1. **Users ↔ Ships** (M:N through UserShipAssignments)
+    - One user can be assigned to many ships
+    - One ship can have many users assigned
+    - Junction: UserShipAssignments
+
+---
+
+## Indexes
+
+Performance indexes created on frequently queried columns:
+
+### CrewServiceHistory
+
+-   IX_CrewServiceHistory_ShipCode
+-   IX_CrewServiceHistory_CrewMemberId
+-   IX_CrewServiceHistory_Dates (SignOnDate, SignOffDate, EndOfContractDate)
+-   IX_CrewServiceHistory_RankId
+
+### BudgetData
+
+-   IX_BudgetData_ShipCode_Period (ShipCode, AccountPeriod)
+-   IX_BudgetData_AccountNumber
+
+### AccountTransactions
+
+-   IX_AccountTransactions_ShipCode_Period (ShipCode, AccountPeriod)
+-   IX_AccountTransactions_AccountNumber
+
+### ChartOfAccounts
+
+-   IX_ChartOfAccounts_Parent (ParentAccountNumber)
+
+### UserShipAssignments
+
+-   IX_UserShipAssignments_ShipCode
+
+---
+
+## Key Business Rules Summary
+
+### Ships
+
+-   Status determines operational visibility
+-   FiscalYear format controls YTD calculations
+
+### Crew Management
+
+-   Crew status calculated from dates, not stored
+-   Multiple contracts per crew member supported
+-   Rank assignments per contract period
+
+### Financial Reporting
+
+-   Budgets and actuals at child account level only
+-   Parent accounts aggregate children recursively
+-   YTD calculations respect ship's fiscal year
+-   Zero != NULL in financial data
+-   Only non-zero records included in reports
+
+### User Access
+
+-   Flexible many-to-many ship assignments
+-   Role-based access through User.Role field

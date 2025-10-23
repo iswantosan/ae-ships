@@ -20,6 +20,9 @@ builder.Services.AddScoped<IShipService, ShipService>();
 builder.Services.AddScoped<ICrewRepository>(provider => new CrewRepository(connectionString));
 builder.Services.AddScoped<ICrewService, CrewService>();
 
+builder.Services.AddScoped<IUserShipAssignmentRepository>(provider => new UserShipAssignmentRepository(connectionString));
+builder.Services.AddScoped<IUserShipAssignmentService, UserShipAssignmentService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

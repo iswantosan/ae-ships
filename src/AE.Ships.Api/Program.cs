@@ -17,6 +17,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShipRepository>(provider => new ShipRepository(connectionString));
 builder.Services.AddScoped<IShipService, ShipService>();
 
+builder.Services.AddScoped<ICrewRepository>(provider => new CrewRepository(connectionString));
+builder.Services.AddScoped<ICrewService, CrewService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

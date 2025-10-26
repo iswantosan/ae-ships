@@ -12,8 +12,9 @@ public class CrewService : ICrewService
         _crewRepository = crewRepository;
     }
 
-    public async Task<IEnumerable<CrewListDto>> GetCrewListAsync(CrewListRequestDto request)
+    public async Task<IEnumerable<CrewListDto>> GetCrewListForShipAsync(string shipCode, CrewListRequestDto request)
     {
+        request.ShipCode = shipCode;
         return await _crewRepository.GetCrewListAsync(request);
     }
 

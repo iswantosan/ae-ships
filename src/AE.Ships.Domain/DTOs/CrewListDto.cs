@@ -8,7 +8,7 @@ public class CrewListDto
     public string LastName { get; set; } = string.Empty;
     public int Age { get; set; }
     public string Nationality { get; set; } = string.Empty;
-    public string SignOnDate { get; set; } = string.Empty;
+    public DateTime SignOnDate { get; set; }
     public string Status { get; set; } = string.Empty;
 }
 
@@ -24,6 +24,7 @@ public class CrewListRequestDto
 
 public class CrewMemberHistoryDto
 {
+    public int ServiceHistoryId { get; set; }
     public string CrewMemberId { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;

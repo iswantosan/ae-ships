@@ -44,7 +44,7 @@ public class CrewRepository : ICrewRepository
                 LastName = reader.GetString("Last Name"),
                 Age = reader.GetInt32("Age"),
                 Nationality = reader.GetString("Nationality"),
-                SignOnDate = reader.GetString("SignOnDate"),
+                SignOnDate = reader.GetDateTime("SignOnDate"),
                 Status = reader.GetString("Status")
             });
         }

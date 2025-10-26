@@ -4,6 +4,6 @@ namespace AE.Ships.Domain.Interfaces;
 
 public interface ICrewService
 {
-    Task<IEnumerable<CrewListDto>> GetCrewListAsync(CrewListRequestDto request);
+    Task<IEnumerable<CrewListDto>> GetCrewListForShipAsync(string shipCode, CrewListRequestDto request);
     Task<IEnumerable<CrewMemberHistoryDto>> GetCrewMemberHistoryAsync(string crewMemberId);
 }

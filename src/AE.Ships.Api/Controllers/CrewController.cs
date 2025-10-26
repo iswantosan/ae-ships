@@ -56,7 +56,7 @@ public class CrewController : ControllerBase
                 SearchTerm = searchTerm
             };
 
-            var crewList = await _crewService.GetCrewListAsync(request);
+            var crewList = await _crewService.GetCrewListForShipAsync(shipCode, request);
             return Ok(crewList);
         }
         catch (Exception ex)

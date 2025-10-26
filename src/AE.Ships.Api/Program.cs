@@ -23,6 +23,9 @@ builder.Services.AddScoped<ICrewService, CrewService>();
 builder.Services.AddScoped<IUserShipAssignmentRepository>(provider => new UserShipAssignmentRepository(connectionString));
 builder.Services.AddScoped<IUserShipAssignmentService, UserShipAssignmentService>();
 
+builder.Services.AddScoped<IFinancialReportRepository>(provider => new FinancialReportRepository(connectionString));
+builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AE.Ships.Application\AE.Ships.Application.csproj" />
+    <ProjectReference Include="..\..\src\AE.Ships.Domain\AE.Ships.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

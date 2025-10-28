@@ -1,11 +1,16 @@
 using AE.Ships.Domain.DTOs;
 using AE.Ships.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AE.Ships.Api.Controllers;
 
+/// <summary>
+/// Ships management controller
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[SwaggerTag("Ships management endpoints for ship operations")]
 public class ShipsController : ControllerBase
 {
     private readonly IShipService _shipService;
@@ -15,7 +20,20 @@ public class ShipsController : ControllerBase
         _shipService = shipService;
     }
 
+    /// <summary>
+    /// Get all ships
+    /// </summary>
+    /// <returns>List of all ships</returns>
+    /// <response code="200">Ships retrieved successfully</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get All Ships",
+        Description = "Retrieves a list of all ships in the system",
+        OperationId = "GetAllShips"
+    )]
+    [SwaggerResponse(200, "Ships retrieved successfully", typeof(IEnumerable<ShipDto>))]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<ShipDto>>> GetAllShips()
     {
         try
@@ -29,7 +47,23 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get ship by code
+    /// </summary>
+    /// <param name="code">Ship code</param>
+    /// <returns>Ship details</returns>
+    /// <response code="200">Ship found</response>
+    /// <response code="404">Ship not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("{code}")]
+    [SwaggerOperation(
+        Summary = "Get Ship by Code",
+        Description = "Retrieves a specific ship by its unique code",
+        OperationId = "GetShip"
+    )]
+    [SwaggerResponse(200, "Ship found", typeof(ShipDto))]
+    [SwaggerResponse(404, "Ship not found")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<ShipDto>> GetShip(string code)
     {
         try
@@ -47,7 +81,23 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Create a new ship
+    /// </summary>
+    /// <param name="createShipDto">Ship creation data</param>
+    /// <returns>Created ship details</returns>
+    /// <response code="201">Ship created successfully</response>
+    /// <response code="400">Invalid request data</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Create Ship",
+        Description = "Creates a new ship with the provided details",
+        OperationId = "CreateShip"
+    )]
+    [SwaggerResponse(201, "Ship created successfully", typeof(ShipDto))]
+    [SwaggerResponse(400, "Invalid request data")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<ShipDto>> CreateShip([FromBody] CreateShipDto createShipDto)
     {
         try
@@ -86,7 +136,24 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Update an existing ship
+    /// </summary>
+    /// <param name="code">Ship code</param>
+    /// <param name="updateShipDto">Updated ship data</param>
+    /// <returns>Updated ship details</returns>
+    /// <response code="200">Ship updated successfully</response>
+    /// <response code="400">Invalid request data</response>
+    /// <response code="500">Internal server error</response>
     [HttpPut("{code}")]
+    [SwaggerOperation(
+        Summary = "Update Ship",
+        Description = "Updates an existing ship with new details",
+        OperationId = "UpdateShip"
+    )]
+    [SwaggerResponse(200, "Ship updated successfully", typeof(ShipDto))]
+    [SwaggerResponse(400, "Invalid request data")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<ShipDto>> UpdateShip(string code, [FromBody] UpdateShipDto updateShipDto)
     {
         try
@@ -125,7 +192,23 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Delete a ship
+    /// </summary>
+    /// <param name="code">Ship code</param>
+    /// <returns>No content</returns>
+    /// <response code="204">Ship deleted successfully</response>
+    /// <response code="404">Ship not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpDelete("{code}")]
+    [SwaggerOperation(
+        Summary = "Delete Ship",
+        Description = "Deletes a ship by its code",
+        OperationId = "DeleteShip"
+    )]
+    [SwaggerResponse(204, "Ship deleted successfully")]
+    [SwaggerResponse(404, "Ship not found")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult> DeleteShip(string code)
     {
         try
@@ -143,7 +226,23 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get ships by status
+    /// </summary>
+    /// <param name="status">Ship status (Active or Inactive)</param>
+    /// <returns>List of ships with specified status</returns>
+    /// <response code="200">Ships retrieved successfully</response>
+    /// <response code="400">Invalid status</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("status/{status}")]
+    [SwaggerOperation(
+        Summary = "Get Ships by Status",
+        Description = "Retrieves all ships with the specified status",
+        OperationId = "GetShipsByStatus"
+    )]
+    [SwaggerResponse(200, "Ships retrieved successfully", typeof(IEnumerable<ShipDto>))]
+    [SwaggerResponse(400, "Invalid status")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<ShipDto>>> GetShipsByStatus(string status)
     {
         try
@@ -162,7 +261,21 @@ public class ShipsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get ships assigned to a user
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of ships assigned to the user</returns>
+    /// <response code="200">Ships retrieved successfully</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("user/{userId}")]
+    [SwaggerOperation(
+        Summary = "Get Ships by User",
+        Description = "Retrieves all ships assigned to a specific user",
+        OperationId = "GetShipsByUser"
+    )]
+    [SwaggerResponse(200, "Ships retrieved successfully", typeof(IEnumerable<ShipDto>))]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<ShipDto>>> GetShipsByUser(int userId)
     {
         try

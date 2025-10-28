@@ -1,11 +1,16 @@
 using AE.Ships.Domain.DTOs;
 using AE.Ships.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AE.Ships.Api.Controllers;
 
+/// <summary>
+/// Financial reports management controller
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[SwaggerTag("Financial reports management endpoints for ship financial operations")]
 public class FinancialReportsController : ControllerBase
 {
     private readonly IFinancialReportService _financialReportService;
@@ -15,7 +20,24 @@ public class FinancialReportsController : ControllerBase
         _financialReportService = financialReportService;
     }
 
+    /// <summary>
+    /// Get financial report for a ship
+    /// </summary>
+    /// <param name="shipCode">Ship code</param>
+    /// <param name="accountPeriod">Account period (date)</param>
+    /// <returns>Financial report data</returns>
+    /// <response code="200">Financial report retrieved successfully</response>
+    /// <response code="400">Invalid request parameters</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("ship/{shipCode}")]
+    [SwaggerOperation(
+        Summary = "Get Financial Report",
+        Description = "Retrieves financial report data for a specific ship and account period",
+        OperationId = "GetFinancialReport"
+    )]
+    [SwaggerResponse(200, "Financial report retrieved successfully", typeof(IEnumerable<FinancialReportDto>))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<FinancialReportDto>>> GetFinancialReport(
         string shipCode,
         [FromQuery] DateTime accountPeriod)
@@ -47,7 +69,24 @@ public class FinancialReportsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get financial report for a ship with request body
+    /// </summary>
+    /// <param name="shipCode">Ship code</param>
+    /// <param name="request">Financial report request data</param>
+    /// <returns>Financial report data</returns>
+    /// <response code="200">Financial report retrieved successfully</response>
+    /// <response code="400">Invalid request data</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost("ship/{shipCode}")]
+    [SwaggerOperation(
+        Summary = "Get Financial Report with Body",
+        Description = "Retrieves financial report data for a specific ship using request body",
+        OperationId = "GetFinancialReportWithBody"
+    )]
+    [SwaggerResponse(200, "Financial report retrieved successfully", typeof(IEnumerable<FinancialReportDto>))]
+    [SwaggerResponse(400, "Invalid request data")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<FinancialReportDto>>> GetFinancialReportWithBody(
         string shipCode,
         [FromBody] FinancialReportRequestDto request)

@@ -1,11 +1,16 @@
 using AE.Ships.Domain.DTOs;
 using AE.Ships.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AE.Ships.Api.Controllers;
 
+/// <summary>
+/// Crew management controller
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[SwaggerTag("Crew management endpoints for ship crew operations")]
 public class CrewController : ControllerBase
 {
     private readonly ICrewService _crewService;
@@ -15,7 +20,28 @@ public class CrewController : ControllerBase
         _crewService = crewService;
     }
 
+    /// <summary>
+    /// Get crew list for a specific ship
+    /// </summary>
+    /// <param name="shipCode">Ship code</param>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10, max: 100)</param>
+    /// <param name="sortColumn">Column to sort by (default: RankOrder)</param>
+    /// <param name="sortDirection">Sort direction ASC or DESC (default: ASC)</param>
+    /// <param name="searchTerm">Search term for filtering crew members</param>
+    /// <returns>Paginated crew list</returns>
+    /// <response code="200">Crew list retrieved successfully</response>
+    /// <response code="400">Invalid request parameters</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("ship/{shipCode}")]
+    [SwaggerOperation(
+        Summary = "Get Crew List for Ship",
+        Description = "Retrieves a paginated list of crew members for a specific ship with optional filtering and sorting",
+        OperationId = "GetCrewList"
+    )]
+    [SwaggerResponse(200, "Crew list retrieved successfully", typeof(IEnumerable<CrewListDto>))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<CrewListDto>>> GetCrewList(
         string shipCode,
         [FromQuery] int pageNumber = 1,
@@ -65,7 +91,23 @@ public class CrewController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get crew member history
+    /// </summary>
+    /// <param name="crewMemberId">Crew member ID</param>
+    /// <returns>Crew member history</returns>
+    /// <response code="200">Crew member history retrieved successfully</response>
+    /// <response code="400">Invalid crew member ID</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet("member/{crewMemberId}")]
+    [SwaggerOperation(
+        Summary = "Get Crew Member History",
+        Description = "Retrieves the complete history of assignments for a specific crew member",
+        OperationId = "GetCrewMemberHistory"
+    )]
+    [SwaggerResponse(200, "Crew member history retrieved successfully", typeof(IEnumerable<CrewMemberHistoryDto>))]
+    [SwaggerResponse(400, "Invalid crew member ID")]
+    [SwaggerResponse(500, "Internal server error")]
     public async Task<ActionResult<IEnumerable<CrewMemberHistoryDto>>> GetCrewMemberHistory(string crewMemberId)
     {
         try

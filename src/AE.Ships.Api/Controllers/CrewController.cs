@@ -2,6 +2,7 @@ using AE.Ships.Domain.DTOs;
 using AE.Ships.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AE.Ships.Api.Controllers;
 
@@ -11,6 +12,7 @@ namespace AE.Ships.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [SwaggerTag("Crew management endpoints for ship crew operations")]
+[Authorize]
 public class CrewController : ControllerBase
 {
     private readonly ICrewService _crewService;

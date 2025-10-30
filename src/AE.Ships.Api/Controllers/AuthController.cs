@@ -1,6 +1,7 @@
 using AE.Ships.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AE.Ships.Api.Controllers;
 
@@ -10,6 +11,7 @@ namespace AE.Ships.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [SwaggerTag("Authentication endpoints for JWT token generation and validation")]
+[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly IJwtService _jwtService;

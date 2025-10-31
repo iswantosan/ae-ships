@@ -50,7 +50,124 @@ Or via SSMS:
 
 ### 2. API Setup
 
-Coming soon...
+#### Prerequisites
+- .NET 9.0 SDK installed
+- SQL Server running with ShipManagement database created
+- Connection string configured in `appsettings.json`
+
+#### Configuration
+
+Update connection string in `src/AE.Ships.Api/appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=ShipManagement;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
+  }
+}
+```
+
+#### Run Locally
+
+```bash
+# Navigate to API project
+cd src/AE.Ships.Api
+
+# Restore dependencies
+dotnet restore
+
+# Build
+dotnet build
+
+# Run
+dotnet run
+```
+
+API will be available at:
+- HTTP: `http://localhost:5110`
+- HTTPS: `https://localhost:7195`
+- Swagger UI: `https://localhost:7195/swagger`
+
+#### Using Docker
+
+```bash
+# Build and run using docker-compose
+docker-compose up -d
+
+# API will be available at http://localhost:8080
+# Swagger UI at http://localhost:8080/swagger
+```
+
+### 3. Authentication
+
+#### JWT Authentication
+
+The API uses JWT Bearer authentication. To access protected endpoints:
+
+1. **Login** to get a token:
+   ```bash
+   POST /api/auth/login
+   {
+     "username": "admin",
+     "password": "admin123"
+   }
+   ```
+
+2. **Use the token** in subsequent requests:
+   ```
+   Authorization: Bearer <your-token>
+   ```
+
+3. **Validate token**:
+   ```bash
+   POST /api/auth/validate
+   {
+     "token": "<your-token>"
+   }
+   ```
+
+**Available test users:**
+- Username: `admin`, Password: `admin123` (Role: Admin)
+- Username: `manager`, Password: `manager123` (Role: Manager)
+- Username: `user`, Password: `user123` (Role: User)
+
+#### Swagger UI
+
+Swagger UI includes JWT authentication support:
+1. Click **Authorize** button at the top right
+2. Enter: `Bearer <your-token>` (or just `<your-token>`)
+3. Click **Authorize** to use the token in all requests
+
+### 4. API Endpoints
+
+#### Ships
+- `GET /api/ships` - Get all ships
+- `GET /api/ships/{code}` - Get ship by code
+- `GET /api/ships/status/{status}` - Get ships by status
+- `GET /api/ships/user/{userId}` - Get ships assigned to user
+- `POST /api/ships` - Create new ship
+- `PUT /api/ships/{code}` - Update ship
+- `DELETE /api/ships/{code}` - Delete ship
+
+#### Crew
+- `GET /api/crew/{shipCode}` - Get crew list for ship (with pagination, sorting, search)
+  - Query parameters: `pageNumber`, `pageSize`, `sortColumn`, `sortDirection`, `searchTerm`
+
+#### Financial Reports
+- `GET /api/financial-reports/{shipCode}` - Get financial report for ship
+  - Query parameters: `accountPeriod` (e.g., "2025-07")
+
+#### Users
+- `GET /api/users` - Get all users
+- `GET /api/users/{id}` - Get user by ID
+- `POST /api/users` - Create new user
+- `PUT /api/users/{id}` - Update user
+- `DELETE /api/users/{id}` - Delete user
+
+#### User-Ship Assignments
+- `GET /api/user-ship-assignments/{userId}` - Get ship assignments for user
+- `POST /api/user-ship-assignments/assign` - Assign ship to user
+- `POST /api/user-ship-assignments/unassign` - Unassign ship from user
 
 ## Features
 
@@ -70,15 +187,19 @@ Coming soon...
     -   [x] Ship management
     -   [x] User assignments
 
-### API Challenge
+### API Challenge ✅
 
--   [ ] REST API endpoints
--   [ ] Ship management
--   [ ] Crew management
--   [ ] Financial reporting
--   [ ] User & ship assignments
--   [ ] Unit tests (xUnit)
--   [ ] Integration tests
+-   [x] REST API endpoints
+-   [x] Ship management
+-   [x] Crew management
+-   [x] Financial reporting
+-   [x] User & ship assignments
+-   [x] JWT Authentication
+-   [x] Swagger UI with JWT support
+-   [x] Unit tests (xUnit)
+-   [x] Integration tests
+-   [x] Error handling and validation
+-   [x] Logging (action filters)
 
 ## Database Documentation
 
@@ -140,3 +261,109 @@ dotnet test
 cd src/AE.Ships.Api
 dotnet run
 ```
+
+### Docker
+
+Build and run with Docker:
+
+```bash
+# Build image
+docker build -t ae-ships-api .
+
+# Run container
+docker run -p 8080:8080 -e ConnectionStrings__DefaultConnection="<your-connection-string>" ae-ships-api
+```
+
+Or use docker-compose (includes SQL Server):
+
+```bash
+docker-compose up -d
+```
+
+### Testing
+
+Run all tests:
+
+```bash
+dotnet test
+```
+
+Run specific test project:
+
+```bash
+# Unit tests
+dotnet test tests/AE.Ships.Application.Tests
+
+# Integration tests
+dotnet test tests/AE.Ships.Api.Tests
+```
+
+### CI/CD
+
+GitHub Actions workflow is configured (`.github/workflows/ci.yml`) to:
+- Build the solution on push/PR
+- Run all tests
+- Publish test results
+
+Workflow triggers on:
+- Push to `main`, `master`, or `develop` branches
+- Pull requests to these branches
+
+## Architecture & Design Decisions
+
+### Clean Architecture
+
+The solution follows Clean Architecture principles:
+- **Domain**: Core business entities and interfaces (no dependencies)
+- **Application**: Business logic and services
+- **Infrastructure**: Data access (repositories using stored procedures only)
+- **API**: Controllers, authentication, middleware
+
+### Database Access
+
+- **Stored Procedures Only**: All database access is via stored procedures to ensure:
+  - SQL injection protection
+  - Centralized business logic
+  - Performance optimization
+  - Security compliance
+
+### Authentication
+
+- **JWT Bearer**: Token-based authentication
+- **Development Mode**: Auto-authentication for easier testing
+- **Production Ready**: Proper token validation and expiration
+
+### Error Handling
+
+- Consistent error responses
+- Validation using FluentValidation (where applicable)
+- Exception handling with appropriate HTTP status codes
+- Meaningful error messages
+
+### Testing Strategy
+
+- **Unit Tests**: Service layer with mocked repositories (xUnit + Moq)
+- **Integration Tests**: API controllers with in-memory/test database (xUnit + WebApplicationFactory)
+- **Coverage**: Core business logic and API endpoints
+
+## Additional Features
+
+### Logging
+
+Action filter logging for:
+- Request/response tracking
+- Error logging
+- Performance monitoring
+
+### Swagger Documentation
+
+- Full API documentation
+- JWT authentication support
+- Request/response examples
+- Interactive API testing
+
+### Docker Support
+
+- Multi-stage Dockerfile for optimized image size
+- Docker Compose for local development with SQL Server
+- Environment variable configuration

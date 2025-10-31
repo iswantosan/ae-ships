@@ -209,6 +209,14 @@ Complete database documentation:
 -   [database/docs/DATABASE_DESIGN](database/docs/DATABASE_DESIGN) - Design documentation
 -   [database/README.md](database/README.md) - Setup guide & stored procedures
 
+### Generate ERD from SQL Server Management Studio (SSMS)
+
+If you prefer to generate the ERD yourself from the actual database schema:
+- Open SSMS → connect to your SQL Server → expand your `ShipManagement` database
+- Right-click `Database Diagrams` → choose `New Database Diagram`
+- Select all relevant tables (e.g., Ships, CrewMembers, CrewServiceHistory, Users, UserShipAssignments, ChartOfAccounts, BudgetData, AccountTransactions, Ranks)
+- SSMS will place tables and relationships; you can rearrange and export to image/PDF
+
 ## Key Business Rules
 
 ### Ship Management

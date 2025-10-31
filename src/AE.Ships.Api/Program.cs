@@ -2,6 +2,8 @@ using AE.Ships.Application.Services;
 using AE.Ships.Domain.Interfaces;
 using AE.Ships.Infrastructure.Data;
 using AE.Ships.Api.Services;
+using AE.Ships.Api.Middleware;
+using AE.Ships.Api.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -9,7 +11,11 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Add logging action filter
+    options.Filters.Add<LoggingActionFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -100,6 +106,9 @@ builder.Services.AddScoped<IFinancialReportRepository>(provider => new Financial
 builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
 
 var app = builder.Build();
+
+// Add request logging middleware (early in pipeline)
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

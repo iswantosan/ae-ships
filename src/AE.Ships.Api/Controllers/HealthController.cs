@@ -29,32 +29,6 @@ public class HealthController : ControllerBase
         return Ok(healthStatus);
     }
 
-    /// <summary>
-    /// Get detailed health information including dependencies
-    /// </summary>
-    /// <returns>Detailed health status</returns>
-    /// <response code="200">Detailed health information</response>
-    [HttpGet("detailed")]
-    [ProducesResponseType(typeof(DetailedHealthStatus), StatusCodes.Status200OK)]
-    public IActionResult GetDetailedHealth()
-    {
-        var detailedHealth = new DetailedHealthStatus
-        {
-            Status = "Healthy",
-            Timestamp = DateTime.UtcNow,
-            Version = "1.0.0",
-            Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
-            Dependencies = new Dictionary<string, string>
-            {
-                { "Database", "Connected" },
-                { "JWT Service", "Available" },
-                { "Logging", "Active" }
-            },
-            Uptime = DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime()
-        };
-
-        return Ok(detailedHealth);
-    }
 }
 
 /// <summary>
@@ -83,18 +57,3 @@ public class HealthStatus
     public string Environment { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Detailed health status response
-/// </summary>
-public class DetailedHealthStatus : HealthStatus
-{
-    /// <summary>
-    /// Dependency status information
-    /// </summary>
-    public Dictionary<string, string> Dependencies { get; set; } = new();
-
-    /// <summary>
-    /// Application uptime
-    /// </summary>
-    public TimeSpan Uptime { get; set; }
-}

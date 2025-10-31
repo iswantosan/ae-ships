@@ -6,8 +6,9 @@
 --
 -- Execution Order:
 -- 1. Schema (tables, constraints, indexes)
--- 2. Sample Data (ships, crew, accounts, financial data)
--- 3. Stored Procedures
+-- 2. Functions
+-- 3. Sample Data (ships, crew, accounts, financial data)
+-- 4. Stored Procedures
 -- =============================================
 
 USE master;
@@ -34,35 +35,119 @@ PRINT '========================================';
 PRINT '';
 
 -- =============================================
--- STEP 1: CREATE SCHEMA
+-- STEP 1: CREATE SCHEMA (TABLES)
 -- =============================================
-PRINT 'STEP 1: Creating database schema...';
+PRINT 'STEP 1: Creating database schema (tables)...';
 PRINT '';
 
--- Note: For script file references (:r), ensure paths are relative to this script's location
--- If running from SSMS, you may need to adjust paths or run scripts individually
+:r schema\01_create_tables.sql
+GO
 
-PRINT 'Execute the following scripts in order:';
-PRINT '1. schema/01_create_tables.sql';
-PRINT '2. schema/02_create_indexes.sql';
-PRINT '3. data/01_insert_ships_and_ranks.sql';
-PRINT '4. data/02_insert_crew_members.sql';
-PRINT '5. data/03_insert_crew_service_history.sql';
-PRINT '6. data/04_insert_chart_of_accounts.sql';
-PRINT '7. data/05_insert_budget_data.sql';
-PRINT '8. data/06_insert_account_transactions.sql';
-PRINT '9. data/07_insert_users_and_assignments.sql';
-PRINT '10. stored-procedures/sp_GetCrewList.sql';
-PRINT '11. stored-procedures/sp_GetFinancialReport.sql';
-PRINT '12. stored-procedures/sp_GetShips.sql';
-PRINT '13. stored-procedures/sp_GetShipsByUser.sql';
-PRINT '14. stored-procedures/sp_GetCrewMemberHistory.sql';
-PRINT '15. stored-procedures/sp_AssignShipToUser.sql';
-PRINT '16. stored-procedures/sp_UnassignShipFromUser.sql';
-PRINT '17. stored-procedures/sp_GetUserShipAssignments.sql';
+-- =============================================
+-- STEP 2: CREATE INDEXES
+-- =============================================
+PRINT 'STEP 2: Creating indexes...';
 PRINT '';
-PRINT 'Alternatively, run each script individually in SSMS.';
+
+:r schema\02_create_indexes.sql
+GO
+
+-- =============================================
+-- STEP 3: CREATE FUNCTIONS
+-- =============================================
+PRINT 'STEP 3: Creating functions...';
 PRINT '';
+
+:r functions\fn_GetFiscalYearStartDate.sql
+GO
+
+:r functions\fn_CalculateCrewStatus.sql
+GO
+
+-- =============================================
+-- STEP 4: INSERT SAMPLE DATA
+-- =============================================
+PRINT 'STEP 4: Inserting sample data...';
+PRINT '';
+
+:r data\01_insert_ships_and_ranks.sql
+GO
+
+:r data\02_insert_crew_members.sql
+GO
+
+:r data\03_insert_crew_service_history.sql
+GO
+
+:r data\04_insert_chart_of_accounts.sql
+GO
+
+:r data\05_insert_budget_data.sql
+GO
+
+:r data\06_insert_account_transactions.sql
+GO
+
+:r data\07_insert_users_and_assignments.sql
+GO
+
+-- =============================================
+-- STEP 5: CREATE STORED PROCEDURES
+-- =============================================
+PRINT 'STEP 5: Creating stored procedures...';
+PRINT '';
+
+-- User Management SPs
+:r stored-procedures\sp_CreateUser.sql
+GO
+:r stored-procedures\sp_GetAllUsers.sql
+GO
+:r stored-procedures\sp_GetUserById.sql
+GO
+:r stored-procedures\sp_UpdateUser.sql
+GO
+:r stored-procedures\sp_DeleteUser.sql
+GO
+:r stored-procedures\sp_UserExists.sql
+GO
+
+-- Ship Management SPs
+:r stored-procedures\sp_CreateShip.sql
+GO
+:r stored-procedures\sp_GetAllShips.sql
+GO
+:r stored-procedures\sp_GetShips.sql
+GO
+:r stored-procedures\sp_GetShipByCode.sql
+GO
+:r stored-procedures\sp_GetShipsByStatus.sql
+GO
+:r stored-procedures\sp_UpdateShip.sql
+GO
+:r stored-procedures\sp_DeleteShip.sql
+GO
+:r stored-procedures\sp_ShipExists.sql
+GO
+
+-- Crew Management SPs
+:r stored-procedures\sp_GetCrewList.sql
+GO
+:r stored-procedures\sp_GetCrewMemberHistory.sql
+GO
+
+-- Financial Report SPs
+:r stored-procedures\sp_GetFinancialReport.sql
+GO
+
+-- User-Ship Assignment SPs
+:r stored-procedures\sp_GetShipsByUser.sql
+GO
+:r stored-procedures\sp_AssignShipToUser.sql
+GO
+:r stored-procedures\sp_UnassignShipFromUser.sql
+GO
+:r stored-procedures\sp_GetUserShipAssignments.sql
+GO
 
 -- =============================================
 -- VERIFICATION
@@ -95,7 +180,14 @@ PRINT '';
 PRINT 'Stored Procedures:';
 SELECT name AS StoredProcedure, create_date AS CreatedDate
 FROM sys.procedures
-WHERE name LIKE 'sp_Get%'
+WHERE schema_id = SCHEMA_ID('dbo')
+ORDER BY name;
+
+PRINT '';
+PRINT 'Functions:';
+SELECT name AS FunctionName, create_date AS CreatedDate
+FROM sys.objects
+WHERE type = 'FN' AND schema_id = SCHEMA_ID('dbo')
 ORDER BY name;
 
 PRINT '';
@@ -103,4 +195,3 @@ PRINT '========================================';
 PRINT 'Ship Management System Setup Complete!';
 PRINT '========================================';
 GO
-

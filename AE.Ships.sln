@@ -15,6 +15,59 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AE.Ships.Domain", "src\AE.S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+	ProjectSection(SolutionItems) = preProject
+		database\setup-master.sql = database\setup-master.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schema", "schema", "{11111111-2222-3333-4444-555555555555}"
+	ProjectSection(SolutionItems) = preProject
+		database\schema\01_create_tables.sql = database\schema\01_create_tables.sql
+		database\schema\02_create_indexes.sql = database\schema\02_create_indexes.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "functions", "functions", "{22222222-3333-4444-5555-666666666666}"
+	ProjectSection(SolutionItems) = preProject
+		database\functions\fn_CalculateCrewStatus.sql = database\functions\fn_CalculateCrewStatus.sql
+		database\functions\fn_GetFiscalYearStartDate.sql = database\functions\fn_GetFiscalYearStartDate.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{33333333-4444-5555-6666-777777777777}"
+	ProjectSection(SolutionItems) = preProject
+		database\data\01_insert_ships_and_ranks.sql = database\data\01_insert_ships_and_ranks.sql
+		database\data\02_insert_crew_members.sql = database\data\02_insert_crew_members.sql
+		database\data\03_insert_crew_service_history.sql = database\data\03_insert_crew_service_history.sql
+		database\data\04_insert_chart_of_accounts.sql = database\data\04_insert_chart_of_accounts.sql
+		database\data\05_insert_budget_data.sql = database\data\05_insert_budget_data.sql
+		database\data\06_insert_account_transactions.sql = database\data\06_insert_account_transactions.sql
+		database\data\07_insert_users_and_assignments.sql = database\data\07_insert_users_and_assignments.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stored-procedures", "stored-procedures", "{44444444-5555-6666-7777-888888888888}"
+	ProjectSection(SolutionItems) = preProject
+		database\stored-procedures\sp_AssignShipToUser.sql = database\stored-procedures\sp_AssignShipToUser.sql
+		database\stored-procedures\sp_CreateShip.sql = database\stored-procedures\sp_CreateShip.sql
+		database\stored-procedures\sp_CreateUser.sql = database\stored-procedures\sp_CreateUser.sql
+		database\stored-procedures\sp_DeleteShip.sql = database\stored-procedures\sp_DeleteShip.sql
+		database\stored-procedures\sp_DeleteUser.sql = database\stored-procedures\sp_DeleteUser.sql
+		database\stored-procedures\sp_GetAllShips.sql = database\stored-procedures\sp_GetAllShips.sql
+		database\stored-procedures\sp_GetAllUsers.sql = database\stored-procedures\sp_GetAllUsers.sql
+		database\stored-procedures\sp_GetCrewList.sql = database\stored-procedures\sp_GetCrewList.sql
+		database\stored-procedures\sp_GetCrewMemberHistory.sql = database\stored-procedures\sp_GetCrewMemberHistory.sql
+		database\stored-procedures\sp_GetFinancialReport.sql = database\stored-procedures\sp_GetFinancialReport.sql
+		database\stored-procedures\sp_GetShipByCode.sql = database\stored-procedures\sp_GetShipByCode.sql
+		database\stored-procedures\sp_GetShips.sql = database\stored-procedures\sp_GetShips.sql
+		database\stored-procedures\sp_GetShipsByStatus.sql = database\stored-procedures\sp_GetShipsByStatus.sql
+		database\stored-procedures\sp_GetShipsByUser.sql = database\stored-procedures\sp_GetShipsByUser.sql
+		database\stored-procedures\sp_GetUserById.sql = database\stored-procedures\sp_GetUserById.sql
+		database\stored-procedures\sp_GetUserShipAssignments.sql = database\stored-procedures\sp_GetUserShipAssignments.sql
+		database\stored-procedures\sp_ShipExists.sql = database\stored-procedures\sp_ShipExists.sql
+		database\stored-procedures\sp_UnassignShipFromUser.sql = database\stored-procedures\sp_UnassignShipFromUser.sql
+		database\stored-procedures\sp_UpdateShip.sql = database\stored-procedures\sp_UpdateShip.sql
+		database\stored-procedures\sp_UpdateUser.sql = database\stored-procedures\sp_UpdateUser.sql
+		database\stored-procedures\sp_UserExists.sql = database\stored-procedures\sp_UserExists.sql
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AE.Ships.Application.Tests", "tests\AE.Ships.Application.Tests\AE.Ships.Application.Tests.csproj", "{CCE45841-0681-4758-9D89-B36299D163F5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AE.Ships.Api.Tests", "tests\AE.Ships.Api.Tests\AE.Ships.Api.Tests.csproj", "{BFAA4C65-7BD9-477F-884D-5A085CA48AF7}"
@@ -112,5 +165,9 @@ Global
 		{8AFA25BF-ACCA-4464-A1ED-07E3C9A2E19E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{CCE45841-0681-4758-9D89-B36299D163F5} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{BFAA4C65-7BD9-477F-884D-5A085CA48AF7} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{11111111-2222-3333-4444-555555555555} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+		{22222222-3333-4444-5555-666666666666} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+		{33333333-4444-5555-6666-777777777777} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+		{44444444-5555-6666-7777-888888888888} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 	EndGlobalSection
 EndGlobal

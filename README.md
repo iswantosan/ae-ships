@@ -2,6 +2,8 @@
 
 Ship Management System backend solution built with C# and SQL Server.
 
+**Repository**: [https://github.com/iswantosan/ae-ships](https://github.com/iswantosan/ae-ships)
+
 ## Project Structure
 
 ```
